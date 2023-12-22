@@ -1,7 +1,8 @@
 from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (QApplication, QLabel, QWidget,
                              QGridLayout, QLineEdit, QPushButton, QComboBox,
-                             QMainWindow, QTableWidget, QTableWidgetItem)
+                             QMainWindow, QTableWidget, QTableWidgetItem,
+                             QDialog)
 import sys
 import sqlite3
 
@@ -37,6 +38,7 @@ class MainWindow(QMainWindow):
                 self.table.setItem(row_number, column_number,
                                    QTableWidgetItem(str(data)))
         connection.close()
+
 
 
 app = QApplication(sys.argv)
