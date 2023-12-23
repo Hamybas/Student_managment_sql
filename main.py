@@ -1,9 +1,9 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QAction
+from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import (QApplication, QLabel, QWidget,
                              QGridLayout, QLineEdit, QPushButton, QComboBox,
                              QMainWindow, QTableWidget, QTableWidgetItem,
-                             QDialog, QVBoxLayout)
+                             QDialog, QVBoxLayout, QToolBar)
 import sys
 import sqlite3
 
@@ -12,14 +12,14 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Student Management Assistant')
-        self.setFixedWidth(600)
-        self.setFixedHeight(700)
+        self.setMinimumSize(800, 600)
 
         file_menu_item = self.menuBar().addMenu("&File")
         help_menu_item = self.menuBar().addMenu("&Help")
         edit_menu_item = self.menuBar().addMenu("&Edit")
 
-        add_student_action = QAction("Add Student", self)
+        add_student_action = QAction(QIcon("icons/add.png"),
+                                     "Add Student", self)
         add_student_action.triggered.connect(self.insert)
         file_menu_item.addAction(add_student_action)
 
@@ -27,16 +27,25 @@ class MainWindow(QMainWindow):
         help_menu_item.addAction(about_action)
         # about_action.setMenuRole(QAction.MenuRole.NoRole)
 
-        search_student_action = QAction("Search Student", self)
+        search_student_action = QAction(QIcon("icons/search.png"),
+                                        "Search Student", self)
         edit_menu_item.addAction(search_student_action)
         search_student_action.triggered.connect(self.search)
 
-
         self.table = QTableWidget()
         self.table.setColumnCount(4)
-        self.table.setHorizontalHeaderLabels(('ID', "Name", "Course", 'Mobile'))
+        self.table.setHorizontalHeaderLabels(
+            ('ID', "Name", "Course", 'Mobile'))
         self.table.verticalHeader().setVisible(False)
         self.setCentralWidget(self.table)
+
+        # Create Toolbar
+        toolbar = QToolBar()
+        toolbar.setMovable(True)
+        self.addToolBar(toolbar)
+        # Add Toolbar elements
+        toolbar.addAction(add_student_action)
+        toolbar.addAction(search_student_action)
 
     def load_data(self):
         connection = sqlite3.connect("004 database.db")
@@ -68,20 +77,20 @@ class InsertDialog(QDialog):
         layout = QVBoxLayout()
 
         # Widgets
-            # Student Name
+        # Student Name
         self.student_name = QLineEdit()
         self.student_name.setPlaceholderText("Name")
         layout.addWidget(self.student_name)
-            # Course
+        # Course
         self.course_name = QComboBox()
         courses = ["Biology", "Meth", "Astronomy", "Physics"]
         self.course_name.addItems(courses)
         layout.addWidget(self.course_name)
-            # Mobile
+        # Mobile
         self.mobile = QLineEdit()
         self.mobile.setPlaceholderText("Mobile")
         layout.addWidget(self.mobile)
-            # Submit Button
+        # Submit Button
         button = QPushButton("Submit")
         button.clicked.connect(self.add_student)
         layout.addWidget(button)
@@ -118,11 +127,13 @@ class Search(QDialog):
         layout.addWidget(button)
 
         self.setLayout(layout)
+
     def search_student(self):
         name = self.student_name.text()
         connection = sqlite3.connect("004 database.db")
         cursor = connection.cursor()
-        result = cursor.execute("SELECT * FROM students WHERE name = ?", (name,))
+        result = cursor.execute("SELECT * FROM students WHERE name = ?",
+                                (name,))
         rows = list(result)
         print(rows)
         items = main_window.table.findItems(name,
